@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="Keywords" content="">
+    <meta name="Description" content="">
+    <title>鼠标拖拽功能</title>
+    <style>
+        body,ul{margin: 0;padding: 0;
+        }
+        li{
+            list-style: none;
+        }
+        body{
+            background-color: #36b4dd;
+        }
+        .wrap{
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+            width: 360px;
+            height: 160px;
+            border: 1px solid red;
+        }
+        .wrap li{
+            position: absolute;
+            width: 100%;
+        }
+        .wrap li img{
+            display: block;
+            width: 350px;
+            padding: 5px;
+            background-color: #fff;
+        }
+        .on{
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            border-radius: 10px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <ul>
+            <li><img src="./images/1.jpg" alt=""></li>
+            <li><img src="./images/2.jpg" alt=""></li>
+            <li><img src="./images/3.jpg" alt=""></li>
+            <li><img src="./images/4.jpg" alt=""></li>
+            <li><img src="./images/5.jpg" alt=""></li>
+            <li><img src="./images/6.jpg" alt=""></li>
+            <li><img src="./images/7.jpg" alt=""></li>
+            <li><img src="./images/8.jpg" alt=""></li>
+        </ul>
+    </div>
+    <script>
+        (function(){
+            var aLi = document.querySelectorAll('.wrap li'),
+            oWrap = document.querySelector('.wrap');
+
+            var len = aLi.length;
+            
+            var startLeft,
+                startTop,
+                newLeft,
+                newTop,
+                leftMin,
+                leftMax,
+                topMin,
+                topMax,
+                timer;
+            change();
+            for (var i = 0; i < len; i++) {
+                aLi[i].onmousedown = function (e) {
+                    clearInterval(timer);
+                    //兼容ie浏览器
+                    e = e || window.event;
+
+                    var startX = e.clientX,
+                        startY = e.clientY,
+                        lastX,
+                        lastY,
+                        _X,
+                        _Y;
+
+                    startLeft = this.offsetLeft,
+                    startTop = this.offsetTop;
+
+                    document.onmousemove = function (e) {
+                        e = e || window.event; 
+
+                       var targetX = e.clientX,
+                           targetY = e.clientY;
+
+                       _X = targetX - lastX;
+                       _y = targetY - lastY;
+
+                       lastX = targetX;
+                       lastY = targetY;
+
+                        nowLeft = startLeft + targetX - startX;
+                        nowTop = startTop + targetY - startY;
+
+                        minMax();
+
+                        style(this, nowLeft, nowTop);
+
+                    }.bind(this)
+
+                    document.onmouseup = function (e) {
+
+                        timer = setInterval(function () {
+                            _X *= 0.8;
+                            _Y *= 0.8;
+
+                            if (Math.abs(_X)<.5 && Math.abs(_Y)<.5) {
+                                clearInterval(timer);
+                            }
+
+                            if (nowLeft > leftMax || nowLeft < leftMin) {
+                                _X = -_X;
+                            }
+                            if (nowTop > topMax || nowTop < topMin) {
+                                _Y = -_Y;
+                            }
+
+                            minMax();
+
+                            nowLeft += _X;
+                            nowTop += _Y;
+
+                            style(this, nowLeft, nowTop);
+                        }.bind(this), 20)
+                       document.onmousemove = null;
+                    }.bind(this)
+                    return false;
+                }
+            }
+            function style (This, nowLeft, nowTop) {
+                This.style.left = nowLeft + 'px';
+                This.style.top = nowTop + 'px';
+            }
+
+
+            /**
+             * 最小值最大值
+             * @return {[type]} [description]
+             */
+            function minMax () {
+                nowLeft = Math.min(nowLeft, leftMax);
+                nowLeft = Math.max(nowLeft, leftMin);
+
+                nowTop = Math.min(nowTop, topMax);
+                nowTop = Math.max(nowTop, topMin);
+            }
+            /**
+             * 边界检测
+             * @return {[type]} [description]
+             */
+            function change () {
+                //左边界
+                leftMin = -(window.innerWidth - oWrap.clientWidth)/2;
+                leftMax = -leftMin;
+                topMin = -(window.innerHeight - oWrap.clientHeight)/2;
+                topMax = -topMin;
+            }
+
+            window.onresize = change;
+
+        })()
+    </script>
+</body>
+</html>
